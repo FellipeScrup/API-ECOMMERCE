@@ -33,7 +33,7 @@ async function seedData() {
                 descricao: 'Tênis Nike Air Max Preto',
                 tags: ['tênis', 'nike', 'esporte']
             },
-            // Added more products
+            // Mais produtos
             {
                 id: '4',
                 nome: 'Camisa Polo Ralph Lauren',
@@ -95,7 +95,7 @@ async function seedData() {
                 email: 'pedro@email.com',
                 dataCadastro: new Date()
             },
-            // Added more users
+            // Mais usuários
             {
                 id: '4',
                 nome: 'Ana Pereira',
@@ -143,7 +143,7 @@ async function seedData() {
                 data: new Date(),
                 valor: 4599.99
             },
-            // Added more purchases
+            // Mais compras
             {
                 id: '3',
                 userId: '4',
@@ -187,7 +187,7 @@ async function seedData() {
                 userId: '1',
                 productId: '2',
                 timestamp: new Date(),
-                tempoVisualizacao: 120 // in seconds
+                tempoVisualizacao: 120 // em segundos
             },
             {
                 id: '2',
@@ -247,10 +247,42 @@ async function seedData() {
             }
         ];
 
+        // Adicionando promoções
+        const promocoes = [
+            {
+                id: '1_3',
+                userId: '1',
+                productId: '3',
+                discount: 10,
+                validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                timestamp: new Date(),
+                motivoPromocao: 'Desconto especial baseado em seu interesse em calçados'
+            },
+            {
+                id: '2_5',
+                userId: '2',
+                productId: '5',
+                discount: 15,
+                validUntil: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+                timestamp: new Date(),
+                motivoPromocao: 'Oferta especial para você experimentar nossos eletrônicos'
+            },
+            {
+                id: '3_1',
+                userId: '3',
+                productId: '1',
+                discount: 20,
+                validUntil: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), 
+                timestamp: new Date(),
+                motivoPromocao: 'Promoção exclusiva em smartphones para você'
+            }
+        ];
+
         await r.table('products').insert(produtos, { conflict: 'replace' }).run(conn);
         await r.table('users').insert(usuarios, { conflict: 'replace' }).run(conn);
         await r.table('purchases').insert(compras, { conflict: 'replace' }).run(conn);
         await r.table('views').insert(visualizacoes, { conflict: 'replace' }).run(conn);
+        await r.table('promotions').insert(promocoes, { conflict: 'replace' }).run(conn);
 
         console.log('Dados inseridos com sucesso');
         await conn.close();
