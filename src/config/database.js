@@ -1,22 +1,12 @@
 const r = require('rethinkdb');
 
-let connection = null;
-
 async function connect() {
     try {
-        connection = await r.connect({
-            host: 'localhost',
-            port: 28015,
-            db: 'ecommerce'
+        const connection = await r.connect({
+            host: process.env.DB_HOST || 'localhost',
+            port: process.env.DB_PORT || 28015,
+            db: process.env.DB_NAME || 'ecommerce'
         });
-        
-        await r.dbCreate('ecommerce').run(connection).catch(() => {});
-        
-        await r.db('ecommerce').tableCreate('users').run(connection).catch(() => {});
-        await r.db('ecommerce').tableCreate('products').run(connection).catch(() => {});
-        await r.db('ecommerce').tableCreate('purchases').run(connection).catch(() => {});
-        await r.db('ecommerce').tableCreate('views').run(connection).catch(() => {});
-        
         console.log('Conexão com RethinkDB estabelecida');
         return connection;
     } catch (error) {
@@ -32,8 +22,9 @@ async function initDatabase() {
             port: 28015
         });
 
+        // Create database if it doesn't exist
         await r.dbList().contains('ecommerce')
-            .do(function(exists) {
+            .do(function (exists) {
                 return r.branch(
                     exists,
                     { created: 0 },
@@ -41,21 +32,26 @@ async function initDatabase() {
                 );
             }).run(conn);
 
-        await r.db('ecommerce').tableList().contains('products')
-            .do(function(exists) {
-                return r.branch(
-                    exists,
-                    { created: 0 },
-                    r.db('ecommerce').tableCreate('products')
-                );
-            }).run(conn);
+        // Create tables if they don't exist
+        // In initDatabase function
+        const tables = ['users', 'products', 'purchases', 'views', 'promotions'];
+        for (const table of tables) {
+            await r.db('ecommerce').tableList().contains(table)
+                .do(function (exists) {
+                    return r.branch(
+                        exists,
+                        { created: 0 },
+                        r.db('ecommerce').tableCreate(table)
+                    );
+                }).run(conn);
+        }
 
         console.log('Banco de dados inicializado com sucesso');
-        return conn;
+        await conn.close();
     } catch (error) {
         console.error('Erro ao inicializar banco:', error);
         throw error;
     }
 }
 
-module.exports = { connect, connection, initDatabase }; 
+module.exports = { connect, initDatabase };
